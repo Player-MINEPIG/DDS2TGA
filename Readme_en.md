@@ -9,7 +9,7 @@ A tool for:
 - Vertically flipping images
 - Renaming files in a specific pattern
 
-Created for ease of learning from a course by [@GivenLemonCoconutYogurt](https://space.bilibili.com/32704665).
+Created for ease of learning from a course by [@给你柠檬椰果养乐多你会跟我玩吗](https://space.bilibili.com/32704665).
 
 ## Installation
 
