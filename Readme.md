@@ -1,6 +1,6 @@
 # Readme
 
-[English version]()
+[English version](https://github.com/Player-MINEPIG/DDS2TGA/blob/master/Readme_en.md)
 
 ## 简介
 
@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
   2. 在窗口中按s然后回车，会进入设置界面
 
-  3. 根据程序指引调整[设置]()
+  3. 根据程序指引调整[设置](https://github.com/Player-MINEPIG/DDS2TGA/blob/master/Settings.md)
 
   4. 每次调整设置都会进行自动保存
   5. 退出设置界面后会重新进入转换界面，除非按c直接退出程序

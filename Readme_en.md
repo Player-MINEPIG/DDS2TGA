@@ -1,6 +1,6 @@
 # Readme
 
-[Chinese Version]()
+[Chinese Version](https://github.com/Player-MINEPIG/DDS2TGA/blob/master/Readme.md)
 
 ## Introduction
 
@@ -40,7 +40,7 @@ pip install -r requirements.txt
 
 - Settings Interface:
   1. Launch the program: `python DDS2TGA.py`
-  2. Press 's' then enter in the window to enter [settings]()
+  2. Press 's' then enter in the window to enter [settings](https://github.com/Player-MINEPIG/DDS2TGA/blob/master/Settings.md)
   3. Adjust settings as guided by the program
   4. Settings are saved automatically after each adjustment
 
