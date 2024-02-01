@@ -1,0 +1,17 @@
+{
+  "VerticalFlip": "Vertically Flip",
+  "Language": "Language: English",
+  "true": "On",
+  "false": "Off",
+  "SaveSettings": "Settings have been saved",
+  "SetSettingsIndex": "Please enter the index of the setting you want to change",
+  "Back": "Press b to return to the previous level",
+  "IncorrectIndex": "Incorrect index, please re-enter",
+  "SetSettingsValue": "Please enter the index of the value you want to change",
+  "ConvertFinished": "Convert finished",
+  "Exit": "Program exit",
+  "NoSettings": "Settings file does not exist, default settings file has been created",
+  "ShowSettings": "Current settings:",
+  "SettingsNotComplete": "Settings file does not conform to the specifications, has been completed according to the default settings",
+  "LanguageOptions": ["简体中文", "English"]
+}

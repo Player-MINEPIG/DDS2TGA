@@ -6,7 +6,7 @@ from PIL import Image
 def Convert(source_directory, destination_directory):
     # 检查源目录是否存在
     if not os.path.isdir(source_directory):
-        PrintErrorWithFiles(settings.Language, "NoSourceDirectory", source_directory)
+        PrintErrorWithFiles(settings.language, "NoSourceDirectory", source_directory)
         return
 
     # 检查目标目录是否存在
@@ -27,7 +27,7 @@ def Convert(source_directory, destination_directory):
             # 检查目标文件是否存在
             if os.path.isfile(new_path):
                 PrintErrorWithFiles(
-                    settings.Language,
+                    settings.language,
                     "DestinationFileExists",
                     new_path.split(os.sep)[-1],
                 )
@@ -43,7 +43,7 @@ def Convert(source_directory, destination_directory):
                     # 将翻转后的图像以TGA格式保存
                     flipped_img.save(new_path, format="TGA")
             except IOError:
-                PrintErrorWithFiles(settings.Language, "ProcessFileError", filename)
+                PrintErrorWithFiles(settings.language, "ProcessFileError", filename)
     return True
 
 
@@ -71,78 +71,56 @@ def PrintErrorWithFiles(language, condition: str, file):
     参数:
     condition -- 错误类型，只能是 "NoSourceDirectory"、"DestinationFileExists" 或 "ProcessFileError"
     """
-    if condition not in [
-        "NoSourceDirectory",
-        "DestinationFileExists",
-        "ProcessFileError",
-    ]:
+    # 定义错误消息模板
+    messages = {
+        "zh-cn": {
+            "NoSourceDirectory": f"源目录{file}不存在",
+            "DestinationFileExists": f"目标文件{file}已存在",
+            "ProcessFileError": f"处理文件{file}时出错",
+        },
+        "en": {
+            "NoSourceDirectory": f"Source directory {file} does not exist",
+            "DestinationFileExists": f"Target file {file} already exists",
+            "ProcessFileError": f"Error processing file {file}",
+        },
+    }
+
+    # 验证condition参数
+    if condition not in messages["en"]:
         raise ValueError(
             'condition must be "NoSourceDirectory", "DestinationFileExists" or "ProcessFileError"'
         )
-    if language == "zh-cn":
-        if condition == "NoSourceDirectory":
-            print(f"源目录{file}不存在")
-            return
-        if condition == "DestinationFileExists":
-            print(f"目标文件{file}已存在")
-            return
-        if condition == "ProcessFileError":
-            print(f"处理文件{file}时出错")
-            return
-        return
-    if language == "en":
-        if condition == "NoSourceDirectory":
-            print(f"Source directory {file} does not exist")
-            return
-        if condition == "DestinationFileExists":
-            print(f"Target file {file} already exists")
-            return
-        if condition == "ProcessFileError":
-            print(f"Error processing file {file}")
-            return
-        return
+
+    # 获取并打印错误信息
+    message = messages.get(language, messages["en"]).get(condition)
+    if message:
+        print(message)
+    else:
+        raise ValueError(f"Unsupported language: {language}")
 
 
 class Settings:
-    def __init__(self):
-        # 设置多语言对应的字典
-        self.dictionary = {
-            "VerticalFlip": {"zh-cn": "垂直翻转", "en": "Vertically Flip"},
-            "Language": {
-                "zh-cn": "语言: 简体中文",
-                "en": "Language: English",
-            },  # 顺序需与后续的options一致
-            True: {"zh-cn": "启用", "en": "On"},
-            False: {"zh-cn": "禁用", "en": "Off"},
-            "SaveSettings": {"zh-cn": "设置已保存", "en": "Settings have been saved"},
-            "SetSettingsIndex": {
-                "zh-cn": "请输入你要更改的设置索引",
-                "en": "Please enter the index of the setting you want to change",
-            },
-            "Back": {
-                "zh-cn": "按b返回上一级",
-                "en": "Press b to return to the previous level",
-            },
-            "IncorrectIndex": {
-                "zh-cn": "输入错误的索引，请重新输入",
-                "en": "Incorrect index, please re-enter",
-            },
-            "SetSettingsValue": {
-                "zh-cn": "请输入你要更改的设置值的索引",
-                "en": "Please enter the index of the value you want to change",
-            },
-            "ConvertFinished": {"zh-cn": "转换结束", "en": "Convert finished"},
-            "Exit": {"zh-cn": "程序结束", "en": "Program exit"},
-        }
+    def __init__(self, language):
         # 设置可选的设置值
         self.SettingsOptions = {
             "VerticalFlip": {1: True, 2: False},
             "Language": {1: "zh-cn", 2: "en"},
         }
-
-        # 设置默认值
+        try:
+            if language not in self.SettingsOptions["Language"].values():
+                raise ValueError("invalid language")
+        except:
+            print(
+                "非法的语言设置，请检查Setting.json，已默认选择中文/invalid language, please check Settings.json and select Chinese by default"
+            )
+            language = "zh-cn"
+        self.dictionary = {}
+        self.Language = language
+        self.SetLanguage()
+        # 设置除语言外的默认值
         self.VerticalFlip = True
-        self.Language = "zh-cn"
+        # 加载设置文件
+        self.load_settings()
 
     def load_settings(self):
         # 创建一个布尔变量来检查设置文件是否完整
@@ -165,56 +143,48 @@ class Settings:
                             self.__dict__[key] = settings[key]
         except FileNotFoundError:
             # 如果设置文件不存在，创建设置文件
-            print(
-                "设置文件不存在，已创建默认设置文件/Settings file does not exist, default settings file has been created"
-            )
-            print("项目设置/Project Settings:")
+            print(self.dictionary["NoSettings"])
+            print(self.dictionary["ShowSettings"])
             print(self.__str__())
             settings_complete = False
-        if not settings_complete:
-            with open("Settings.json", "w") as f:
-                json.dump(self.__dict__, f)
-            print(
-                "设置文件不符合规范，已按默认设置补全/Settings file does not conform to the specifications, has been completed according to the default settings"
-            )
+        if not settings_complete or len(self.SettingsOptions) != len(settings):
+            self.save_settings()
+            print(self.dictionary["SettingsNotComplete"])
 
     def set_settings(self):
         while True:
             print(self.__str__())
-            print(self.dictionary["SetSettingsIndex"][self.Language])
-            print(self.dictionary["Back"][self.Language])
+            print(self.dictionary["SetSettingsIndex"])
+            print(self.dictionary["Back"])
             index = input()
             print()
             if index == "b":
                 break
             if index == "c":
-                print(self.dictionary["Exit"][self.Language])
+                print(self.dictionary["Exit"])
                 exit()
             try:
                 index = int(index)
                 if index <= 0 or index > len(self.__dict__) - 2:
-                    print(self.dictionary["IncorrectIndex"][self.Language])
+                    print(self.dictionary["IncorrectIndex"])
                     continue
                 # 获取成员变量名
                 key = list(self.SettingsOptions.keys())[index - 1]
                 # 输出设置值选项
                 if isinstance(self.__dict__[key], bool):
-                    print(
-                        f"1: {self.dictionary[key][self.Language]}: {self.dictionary[True][self.Language]}"
-                    )
-                    print(
-                        f"2: {self.dictionary[key][self.Language]}: {self.dictionary[False][self.Language]}"
-                    )
+                    print(f"1: {self.dictionary[key]}: {self.dictionary['true']}")
+                    print(f"2: {self.dictionary[key]}: {self.dictionary['false']}")
                 else:
-                    for i in range(len(self.dictionary[key])):
-                        print(f"{i+1}: {list(self.dictionary[key].values())[i]}")
-                print(self.dictionary["SetSettingsValue"][self.Language])
+                    keyOptions = key + "Options"
+                    for i in range(len(self.dictionary[keyOptions])):
+                        print(f"{i+1}: {list(self.dictionary[keyOptions])[i]}")
+                print(self.dictionary["SetSettingsValue"])
                 value = input()
                 print()
                 if value == "b":
                     continue
                 if value == "c":
-                    print(self.dictionary["Exit"][self.Language])
+                    print(self.dictionary["Exit"])
                     exit()
                 value = int(value)
                 if isinstance(self.__dict__[key], bool):
@@ -223,29 +193,48 @@ class Settings:
                     elif value == 2:
                         self.__dict__[key] = False
                     else:
-                        print(self.dictionary["IncorrectIndex"][self.Language])
+                        print(self.dictionary["IncorrectIndex"])
                         continue
                 else:
-                    if value <= 0 or value > len(self.dictionary[key]):
-                        print(self.dictionary["IncorrectIndex"][self.Language])
+                    keyOptions = key + "Options"
+                    if value <= 0 or value > len(self.dictionary[keyOptions]):
+                        print(self.dictionary["IncorrectIndex"])
                         continue
                     self.__dict__[key] = self.SettingsOptions[key][value]
             except ValueError:
-                print(self.dictionary["IncorrectIndex"][self.Language])
+                print(self.dictionary["IncorrectIndex"])
                 continue
+            # 检测Language是否改变
+            if key == "Language":
+                self.SetLanguage()
             self.save_settings()
+
+    # 更新语言
+    def SetLanguage(self):
+        if self.Language == "zh-cn":
+            try:
+                with open("zh-cn.json", "r", encoding="utf-8") as f:
+                    self.dictionary = json.load(f)
+            except:
+                raise FileNotFoundError("zh-cn.json not found")
+        if self.Language == "en":
+            try:
+                with open("en.json", "r", encoding="utf-8") as f:
+                    self.dictionary = json.load(f)
+            except:
+                raise FileNotFoundError("en.json not found")
 
     # 将设置保存到设置文件
     def save_settings(self):
-        with open("Settings.json", "w") as f:
+        with open("Settings.json", "w", encoding="utf-8") as f:
             temp_dict = {}
             # 只留下SettingsOptions的key中有的值再存入
             for key in self.__dict__.keys():
                 if key in self.SettingsOptions:
                     temp_dict[key] = self.__dict__[key]
 
-            json.dump(temp_dict, f)
-        print(self.dictionary["SaveSettings"][self.Language])
+            json.dump(temp_dict, f, indent=4)
+        print(self.dictionary["SaveSettings"])
 
     # 打印设置
     def __str__(self):
@@ -255,9 +244,12 @@ class Settings:
         for key in self.SettingsOptions.keys():
             # 检查量是否为布尔值
             if isinstance(self.__dict__[key], bool):
-                output += f"{num}: {self.dictionary[key][self.Language]}: {self.dictionary[self.__dict__[key]][self.Language]}\n"
+                bool_str = str(self.__dict__[key]).lower()
+                output += (
+                    f"{num}: {self.dictionary[key]}: {self.dictionary[bool_str]}\n"
+                )
             else:
-                output += f"{num}: {self.dictionary[key][self.Language]}\n"
+                output += f"{num}: {self.dictionary[key]}\n"
             num += 1
         return output
 
@@ -279,17 +271,35 @@ def main():
             continue
         if main_dir == "c":
             settings.save_settings()
-            print(settings.dictionary["Exit"][settings.Language])
+            print(settings.dictionary["Exit"])
             exit()
         source_dir = main_dir + os.sep + "dds"  # 源dds目录路径
         dest_dir = main_dir + os.sep + "tga"  # 目标目录路径
         if Convert(source_dir, dest_dir):
-            print(settings.dictionary["ConvertFinished"][settings.Language])
+            print(settings.dictionary["ConvertFinished"])
         PrintTips(settings.Language)
 
 
 global settings
 if __name__ == "__main__":
-    settings = Settings()
-    settings.load_settings()
+    # 检查Settings文件是否存在，并读取语言设置，若为第一次打开程序，则询问语言
+    language = ""
+    if not os.path.isfile("Settings.json"):
+        while True:
+            print("请选择您的语言的索引/Please enter the index of the language you want to use")
+            print("1: 简体中文")
+            print("2: English")
+            language = input()
+            print()
+            if language == "1":
+                language = "zh-cn"
+                break
+            if language == "2":
+                language = "en"
+                break
+            print("Incorrect index, please re-enter")
+    else:
+        with open("Settings.json", "r", encoding="utf-8") as f:
+            language = json.load(f)["Language"]
+    settings = Settings(language)
     main()
