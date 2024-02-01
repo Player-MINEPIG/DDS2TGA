@@ -24,19 +24,13 @@ pip install -r requirements.txt
 
 ## Usage
 
-- Set the language in the setting interface:
-  1. Lunch the program
-  2. Press 's'
-  3. Press '2'
-  4. Press '2'
-  5. Now it's the English UI
-
 - Conversion Interface:
 
   1. Launch the program: `python DDS2TGA.py`
-  2. Ensure a `dds` directory is in the source folder, like `Bronya_00/dds`
-  3. Drag and drop the source folder into the program window and press enter
-  4. After conversion, the program waits for the next directory input or switches to the settings interface
+  2. Choose your language
+  3. Ensure a `dds` directory is in the source folder, like `Bronya_00/dds`
+  4. Drag and drop the source folder into the program window and press enter
+  5. After conversion, the program waits for the next directory input or switches to the settings interface
 
 - Settings Interface:
   1. Launch the program: `python DDS2TGA.py`
